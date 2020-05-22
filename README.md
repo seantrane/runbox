@@ -26,11 +26,15 @@ It is meant to be forked and manicured to whatever liking an individual wishes, 
 ```sh
 # 1. Clone repo in a directory you feel comfortable with.
 #    These instructions use the "$HOME" directory.
+
 git clone https://github.com/seantrane/devbox.git "$HOME/devbox"
+
 # 2. Create aliases in your ".profile" or ".zshenv" file
 #    that resolve to the DevBox binaries.
+
 echo "alias devbox='$HOME/devbox/bin/devbox'" >> "$HOME/.profile"
-echo "alias devboxd='$HOME/devbox/bin/devbox_remove'" >> "$HOME/.bashrc"
+echo "alias devboxd='$HOME/devbox/bin/devbox_remove'" >> "$HOME/.profile"
+
 # 3. Restart your shell environment.
 ```
 
@@ -38,17 +42,23 @@ echo "alias devboxd='$HOME/devbox/bin/devbox_remove'" >> "$HOME/.bashrc"
 
 ```sh
 # 1. Run any binary (from the DevBox) in your current directory.
+
 devbox aws --version
+
 # 2. Launch the DevBox container, mounting your
 #    current directory to the DevBox "/workspace" directory.
+
 devbox
+
 # 3. The DevBox has many built-in aliases and shortcuts.
 #    Aliases can only be accessed inside the container,
 #    because "exec" command doesn't know they exist.
+
 la # =>  ls -lahF --color --time-style=long-iso
 .. # =>  cd ..
 ... # =>  cd ../..
 .... # =>  cd ../../..
+
 # 4. Shell environment enhancements, such as aliases,
 #    can be found/configured in the "src/dotfiles" directory.
 ```
