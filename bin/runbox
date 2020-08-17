@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+#
+# RunBox CLI to create/destroy image and run container
+
+# DEPENDENCIES
+! type "docker" &> /dev/null && echo "!!! Please install docker before running this script !!!" && return 1
+
+# shellcheck disable=SC1090
+. "${BASH_SOURCE%/*}/docker_functions.sh"
+
+runbox__description () {
+  echo "RunBox CLI to create/destroy image and run container"
+}
+
+runbox__help () {
+  echo "
+  runbox
+
+    $(runbox__description)
+
+  Globals:
+
+    None
+
+  Usage: runbox ***box [options] [arguments]
+
+  Options:
+
+    -r, --remove  Remove the specified RunBox image and exit.
+    -b, --build   Build the specified RunBox, but do not run the container.
+    -n, --new     Re-build the specified RunBox and run the container.
+    --help        Show help text and exit.
+
+  Arguments:
+
+    [1] \$__image_name  First argument must variant-name of Dockerfile to run.
+    [*]                 All additional args are passed to the container entrypoint script.
+
+  Returns:
+
+    None
+
+  Examples:
+
+    runbox basebox
+    runbox basebox bash --version
+    runbox basebox -n
+    runbox basebox --new
+    runbox basebox -b
+    runbox basebox --build
+    runbox basebox -r
+    runbox basebox --remove
+  "
+}
+
+################################################################################
+# RunBox CLI to create/destroy image and run container
+# Globals:
+#   None
+# Options:
+#   -r, --remove  Remove the specified RunBox image and exit.
+#   -b, --build   Build the specified RunBox, but do not run the container.
+#   -n, --new     Re-build the specified RunBox and run the container.
+#   --help        Show help text and exit.
+# Arguments:
+#   [1] $__image_name   First argument must variant-name of Dockerfile to run.
+#   [*]                 All additional args are passed to the container entrypoint script.
+# Returns:
+#   None
+# Examples:
+#   runbox basebox
+#   runbox basebox bash --version
+#   runbox basebox -n
+#   runbox basebox --new
+#   runbox basebox -b
+#   runbox basebox --build
+#   runbox basebox -r
+#   runbox basebox --remove
+################################################################################
+runbox () {
+  if [[ "${1:-}" = "--help" ]]; then
+    runbox__help
+    return
+  fi
+  __docker_context_path=$( cd "${BASH_SOURCE%/*}/../src" && pwd )
+  __image_profile="${USER:-localhost}"
+  __image_name="${1:-}"
+  shift
+  __docker_image_tag="$__image_profile/$__image_name:latest"
+  __docker_file_path="$__docker_context_path/Dockerfile.$__image_name"
+
+  if [[ ! -d "$__docker_context_path" ]]; then
+    echo "Docker context-path not found, or not a directory; '$__docker_context_path'"
+    exit 1
+  fi
+
+  if [[ ! -f "${__docker_file_path}" ]]; then
+    echo "First argument must match extension of existing Dockerfile; '$__docker_file_path'"
+    exit 1
+  fi
+
+  TZ="$(readlink /etc/localtime | sed 's#/var/db/timezone/zoneinfo/##')"
+  export TZ
+
+  # CLI flags
+  if [[ "${1:-}" = "-r" ]] || [[ "${1:-}" = "--remove" ]]; then
+    remove_docker_image "$__docker_image_tag"
+    exit 0
+  elif [[ "${1:-}" = "-b" ]] || [[ "${1:-}" = "--build" ]]; then
+    shift
+    build_docker_image "$__docker_image_tag" "$__docker_context_path" "$__docker_file_path" "$@" || {
+      echo $?
+      exit 1
+    }
+    exit 0
+  elif [[ "${1:-}" = "-n" ]] || [[ "${1:-}" = "--new" ]]; then
+    shift
+    build_docker_image "$__docker_image_tag" "$__docker_context_path" "$__docker_file_path" || {
+      echo $?
+      exit 1
+    }
+  fi
+
+  run_docker_container "$__docker_image_tag" "$__docker_context_path" "$__docker_file_path" "$@"
+}
+
+runbox "$@"
