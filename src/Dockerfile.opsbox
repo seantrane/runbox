@@ -1,0 +1,136 @@
+FROM ruby:2.6 as opsbox
+
+ARG WORK_DIR
+ENV WORK_DIR "${WORK_DIR:-/mnt/pwd}"
+
+ARG GROUP_ID=1000
+ARG GROUP_NAME=dev
+ARG USER_ID=1000
+ARG USER_NAME=dev
+
+ENV LANG C.UTF-8
+
+ARG TERRAFORM_VERSION=0.12.29
+
+ENV AWS_CLI_FILE_ENCODING "UTF-8"
+ENV AWS_DEFAULT_OUTPUT "json"
+ENV AWS_DEFAULT_REGION "us-east-1"
+
+LABEL \
+  "id"="com.seantrane.runbox.opsbox" \
+  "name"="OpsBox" \
+  "version"="1.0.0" \
+  "description"="A portable shell environment and toolkit for software/ops engineers, using Docker." \
+  "maintainer"="https://github.com/seantrane" \
+  "repository"="https://github.com/seantrane/runbox" \
+  "issues"="https://github.com/seantrane/runbox/issues" \
+  "license"="ISC" \
+  "build_timestamp"="$(date +%s)"
+
+SHELL ["/bin/bash", "-c"]
+
+RUN set -x \
+  && echo -e "\n\n USER ❯ ${USER:-$(id -un 2> /dev/null || echo "\u")} @ ${HOST:-${HOSTNAME:-$(hostname 2> /dev/null || echo "\h")}} (${LANG:-}) \n\n SYSTEM ❯ ${UMACH:-${MACHTYPE:-$(uname -m 2> /dev/null)}} \n\n SHELL ❯ $(${SHELL:-} --version | head -n 1) \n\n" \
+  # Add non-root user/group.
+  && groupadd -r -g "${GROUP_ID}" "${GROUP_NAME}" \
+  && useradd -r -g "${GROUP_NAME}" -u "${USER_ID}" -m -s "/bin/bash" "${USER_NAME}" \
+  && usermod -aG sudo "${USER_NAME}" \
+  && cat "/etc/passwd" \
+  && ls -lahF --time-style=long-iso --color "/home" \
+  && ls -lahF --time-style=long-iso --color "/home/${USER_NAME}" \
+  \
+  # Install core dependencies.
+  && apt-get update && apt-get install --no-install-recommends --no-install-suggests -yq \
+    apt-utils \
+    automake \
+    build-essential \
+    ca-certificates \
+    gnupg \
+    sudo \
+  && rm -rf /var/lib/apt/lists/* \
+  \
+  # Install system dependencies.
+  && apt-get update && apt-get install --no-install-recommends --no-install-suggests -yq \
+    ack \
+    bash \
+    bash-completion \
+    bash-doc \
+    curl \
+    dnsutils \
+    git \
+    grc \
+    jq \
+    less \
+    openssh-client \
+    openssh-server \
+    shellcheck \
+    unzip \
+    zip \
+  && rm -rf /var/lib/apt/lists/* \
+  \
+  # Set Bash as default shell.
+  && sed -i -e "s/bin\/sh/bin\/bash/" /etc/passwd \
+  && cat "/etc/passwd" \
+  && command -v bash && bash --version \
+  \
+  # Install AWS-CLI, Python 2/3, Terraform and Vault.
+  && apt-get update && apt-get install --no-install-recommends --no-install-suggests -yq \
+    libkrb5-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    python-dev \
+    python-pip \
+    python3-dev \
+    python3-pip \
+    zlib1g-dev \
+  && rm -rf /var/lib/apt/lists/* \
+  \
+  && pip3 install setuptools \
+  && pip3 install wheel \
+  && pip3 install pyyaml \
+  \
+  && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+  && unzip awscliv2.zip \
+  && sudo ./aws/install \
+  && rm -rf ./aws awscliv2.zip \
+  \
+  && pip3 install aws-adfs \
+  \
+  && curl -Os "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+  && unzip "terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -d /usr/bin \
+  && rm -f "terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+  && command -v terraform && terraform --version \
+  \
+  && ls -lahF --time-style=long-iso --color "/usr/bin" \
+  \
+  # Create work directory.
+  && mkdir -p "${WORK_DIR}" \
+  && chown -R "${USER_NAME}:${GROUP_NAME}" "${WORK_DIR}" \
+  && ls -lahF --time-style=long-iso --color "${WORK_DIR}/.." \
+  ;
+
+# Copy dotfiles.
+COPY --chown=${USER_NAME}:${GROUP_NAME} dotfiles "/home/${USER_NAME}/dotfiles/"
+
+# Symlink dotfiles.
+RUN set -x; \
+  # symlink_dotfiles; \
+  ls -lahFR --time-style=long-iso --color "/home/${USER_NAME}"; \
+  for src in $(find -H "/home/${USER_NAME}/dotfiles" -maxdepth 2 -name "*.symlink" -not -path "*.git*"); do \
+    symlink="/home/${USER_NAME}/.$(basename "${src%.*}")"; \
+    [[ -f "${symlink}" ]] && mv "${symlink}" "${symlink}.backup"; \
+    ln -s "$src" "${symlink}" \
+      && chmod 755 "${symlink}" \
+      && chown -R "${USER_NAME}:${GROUP_NAME}" "${symlink}"; \
+  done; \
+  ls -lahF --time-style=long-iso --color "/home/${USER_NAME}";
+
+USER "${USER_NAME}"
+
+WORKDIR "${WORK_DIR}"
+
+VOLUME ["${WORK_DIR}"]
+
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["bash"]
