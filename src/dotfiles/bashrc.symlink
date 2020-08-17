@@ -36,7 +36,6 @@
 # that you only want executed when the shell is interactive, and
 # not in scripts, which you can put in the “conditional section”.
 
-
 #-----------------------------------------------------------------------
 # Load `.env` a.k.a. `~/.dotfiles/shell/env.symlink`
 #-----------------------------------------------------------------------
@@ -65,11 +64,19 @@
 ########################################################################
 ########################################################################
 
+#-----------------------------------------------------------------------
+# FUNCTIONS
+#-----------------------------------------------------------------------
+
+# . ~/.functions
+# shellcheck disable=SC1090
+[[ -f "$HOME/.functions" ]] && . "$HOME/.functions"
+
 # autoload every function:
-if [[ -d "$DOTFILES/functions" ]]; then
-  # for file in ~/.dotfiles/functions/{extract,link_file}; do
+if [[ -d "$HOME/dotfiles/functions" ]]; then
+  # for file in ~/dotfiles/functions/{extract,link_file}.sh; do
   # shellcheck disable=SC2044
-  for file in $(find -H "$DOTFILES/functions" -maxdepth 2 -name '[A-Za-z0-9\-\_]*'); do
+  for file in $(find -H "$HOME/dotfiles/functions" -maxdepth 2 -name '[A-Za-z0-9\-\_]*.sh'); do
     # shellcheck disable=SC1090,SC1091
     [[ -r "$file" ]] && [[ -f "$file" ]] && . "$file"
   done
@@ -84,7 +91,7 @@ fi
 ########################################################################
 ########################################################################
 ##
-##  1. SCRIPT / NON-INTERACTIVE / .bash_env
+##  1a. SCRIPT / NON-INTERACTIVE / .bash_env
 ##
 ##  Only for NON-interactive shells (ie; scripts)
 ##  See `~/.bash_env` for bash-script-resources.
@@ -101,7 +108,7 @@ if [[ -z "$PS1" ]]; then
 ########################################################################
 ########################################################################
 ##
-##  2. INTERACTIVE / PROMPT / .bashrc
+##  1b. INTERACTIVE / PROMPT / .bashrc
 ##
 ##  This is executed only for interactive shells.
 ##  If you have a command-prompt, this conditional was met.
@@ -211,7 +218,7 @@ fi
 ########################################################################
 ########################################################################
 ##
-##  3. LOGIN / .bash_profile / .bash_login
+##  2a. LOGIN / .bash_profile / .bash_login
 ##
 ##  This is executed only when it is a login shell.
 ##  Put your `~/.bash_profile` and `~/.bash_login` stuff here.
@@ -238,7 +245,7 @@ echo -e "\n"
 ########################################################################
 ########################################################################
 ##
-##  4. NON-LOGIN / .bash_profile
+##  2b. NON-LOGIN / .bash_profile
 ##
 ##  Only when it is NOT a login shell.
 ##  This is the default `~/.bashrc` environment.

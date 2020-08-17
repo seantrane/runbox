@@ -4,6 +4,9 @@
 #
 # Defines the $PATH export/variable for shell environments.
 
+DOTFILES="${DOTFILES:-$HOME/dotfiles}"
+export DOTFILES
+
 #-----------------------------------------------------------------------
 # BINARIES/SCRIPTS
 #-----------------------------------------------------------------------
