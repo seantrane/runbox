@@ -49,7 +49,7 @@ Thank you for contributing.
 ## Clone the Repository <a id="clone-repo"></a>
 
 ```sh
-git clone git@github.com:seantrane/devbox.git devbox && cd devbox
+git clone git@github.com:seantrane/runbox.git devbox && cd devbox
 ```
 
 ---
@@ -62,8 +62,8 @@ devbox/
 ├─ .github/                                   * GitHub config directory
 │
 ├─ bin/                                       * Binaries directory
-│  ├─ devbox                                  * DevBox binary to create image and run container
-│  └─ devbox_remove                           * DevBox binary to destroy image
+│  ├─ docker_functions.sh                     * Support functions for the RunBox CLI
+│  └─ runbox                                  * RunBox CLI to create/destroy image and run container
 │
 ├─ src/                                       * Source files directory
 │  ├─ dotfiles/                               * Dotfiles directory
@@ -79,7 +79,9 @@ devbox/
 │  │  └─ maven-settings-docker.xml
 │  │
 │  ├─ docker-entrypoint.sh                    * Bash docker-entrypoint file
-│  └─ Dockerfile                              * The DevBox Dockerfile
+│  ├─ Dockerfile.basebox                      * The BaseBox Dockerfile
+│  ├─ Dockerfile.devbox                       * The DevBox Dockerfile
+│  └─ Dockerfile.opsbox                       * The OpsBox Dockerfile
 │
 ├─ .editorconfig                              * Keep developers/IDE's in sync
 ├─ .env.example                               * Environment configuration variables template
