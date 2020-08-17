@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+install () {
+  ! type "docker" &> /dev/null && echo "!!! Please install docker before running this script !!!" && return 1
+
+  echo "Creating aliases in host machine's '.profile' or '.zshenv' file that resolve to the RunBox binaries."
+
+  _runbox_aliases=$(
+    echo
+    echo "# ---"
+    echo "# RunBox aliases"
+    echo "alias runbox='$HOME/runbox/bin/runbox'"
+    echo "# Default RunBoxes..."
+    echo "alias basebox='$HOME/runbox/bin/runbox basebox'" # ~> Dockerfile.basebox
+    echo "alias devbox='$HOME/runbox/bin/runbox devbox'" # ~> Dockerfile.devbox
+    echo "alias opsbox='$HOME/runbox/bin/runbox opsbox'" # ~> Dockerfile.opsbox
+    echo "# Custom RunBoxes..."
+    # echo "alias examplebox='$HOME/runbox/bin/runbox examplebox'" # ~> Dockerfile.examplebox
+    echo "# ---"
+    echo
+  )
+
+  echo "Creating aliases in '$HOME/.profile' file."
+  echo "$_runbox_aliases" >> "$HOME/.profile"
+
+  [[ -f "$HOME/.zshenv" ]] && {
+    echo "Creating aliases in '$HOME/.zshenv' file."
+    echo "$_runbox_aliases" >> "$HOME/.zshenv"
+  }
+
+  echo "Restart your shell environment now."
+}
+
+install "$@"
