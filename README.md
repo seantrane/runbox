@@ -98,43 +98,24 @@ Creates aliases in host machine's `.profile` file that resolve to the _RunBox_ b
 
 If the Docker image has not been built, then it will automatically be built.
 
-For these docs, `devbox` is the _RunBox_ used, but the behaviors are identical for all _RunBoxes_.
+For these docs, `basebox` is the _RunBox_ used, but the behaviors are identical for all _RunBoxes_.
 
 ### Run any binary (from the _RunBox_) in your current directory
 
-This command will launch the `devbox` container, run the binary-command, then terminate the container.
+This command will launch the `basebox` container, run the binary-command, then terminate the container.
 
 ```sh
-devbox bash --version
+basebox bash --version
 ```
 
 ### Launch the _RunBox_ container
 
 This will mount the current directory on the host machine to the `/mnt/pwd` directory in the RunBox Docker image.
 
-This means the Docker container will have access to the host machine's file system, from the directory you choose to launch it from.
+This means the Docker container will have access to the host file system, from the directory you choose to launch it from.
 
 ```sh
-devbox
-```
-
-### The _RunBox_ has many built-in aliases and shortcuts
-
-Aliases can only be accessed while inside the container, because the `exec` command doesn't know they exist.
-
-> If you enter `la` command, after launching the container, you should see a list of directory contents from the host machine.
-
-```sh
-la       # =>  ls -lahF --color --time-style=long-iso
-..       # =>  cd ..
-...      # =>  cd ../..
-....     # =>  cd ../../..
-
-gac      # =>  git add -A && git commit -m
-glog     # =>  List all Git commits
-
-npmlistg # =>  List all global npm packages
-npmlist  # =>  List all local npm packages
+basebox
 ```
 
 ### Shell environment enhancements are enabled via `dotfiles`
@@ -143,6 +124,48 @@ Shell environment enhancements, such as aliases, can be found/configured in the 
 
 Every file in the `dotfiles` directory named `*.symlink` are symlinked to `$HOME/.*` files in the _RunBoxes_.
 For example, `bash_profile.symlink` is symlinked to `$HOME/.bash_profile` in the _RunBox_.
+
+### The _RunBox_ has many built-in aliases, functions and shortcuts
+
+Aliases and functions can only be accessed while inside the container, because the `exec` command doesn't know they exist.
+
+> If you enter `la` command, after launching the container, you should see a list of directory contents from the host machine.
+
+Note: Some aliases/functions may only work on _RunBoxes_ that contain their respective dependencies.
+For example; `npm` aliases will only work on a _RunBox_ containing `npm`.
+
+### Alias & Function Reference
+
+#### File system shortcuts
+
+```sh
+la       # =>  ls -lahF --color --time-style=long-iso
+..       # =>  cd ..
+...      # =>  cd ../..
+....     # =>  cd ../../..
+```
+
+#### Git
+
+```sh
+gac      # =>  git add -A && git commit -m
+glog     # =>  List all Git commits
+```
+
+#### Node.js/npm
+
+```sh
+npmlistg # =>  List all global npm packages
+npmlist  # =>  List all local npm packages
+```
+
+#### AWS
+
+```sh
+awslist      # =>  List AWS Named Profiles (aws-adfs list).
+awslogin     # =>  Scripted aws-adfs login routine.
+awslogout    # =>  Scripted aws-adfs reset routine.
+```
 
 ---
 
