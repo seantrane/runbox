@@ -27,9 +27,9 @@ The primary benefits are:
 
 There are 3 default _RunBoxes_ that can be built and launched independently:
 
-- BaseBox = `basebox` _Enhanced shell environment using Bash v4._
-- DevBox = `devbox` _Enhanced shell + full suite of polyglot developer dependencies and IaC utilities._
-- OpsBox = `opsbox` _Enhanced shell + Ops-related and Infrastructure-as-Code utilities._
+- BaseBox (`basebox`) = _Enhanced shell environment using Bash v4._
+- DevBox (`devbox`) = _Enhanced shell + full suite of polyglot developer dependencies and IaC utilities._
+- OpsBox (`opsbox`) = _Enhanced shell + Ops-related and Infrastructure-as-Code utilities._
 
 The solution allows for many _RunBoxes_ to be created, as each _RunBox_ is an individual `Dockerfile`.
 
