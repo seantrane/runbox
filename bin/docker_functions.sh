@@ -5,7 +5,10 @@
 # Globals:
 #   docker
 # Arguments:
-#   None
+#   [1] $__docker_image_tag     Docker Image Tag.
+#   [2] $__docker_context_path  Path to Docker Context (files getting copied to Docker image).
+#   [3] $__docker_config_file   [optional] Path to Dockerfile. Default looks for 'Dockerfile' in Context path.
+#   [*]                         All additional args are passed to the 'docker build' command.
 # Returns:
 #   None
 #######################################
@@ -54,7 +57,7 @@ build_docker_image () {
 # Globals:
 #   docker
 # Arguments:
-#   None
+#   [1] $__docker_image_tag   Docker Image Tag.
 # Returns:
 #   None
 #######################################
@@ -70,7 +73,10 @@ remove_docker_image () {
 # Globals:
 #   docker
 # Arguments:
-#   Passes arguments to the 'docker run' command.
+#   [1] $__docker_image_tag     Docker Image Tag.
+#   [2] $__docker_context_path  Path to Docker Context (files getting copied to Docker image).
+#   [3] $__docker_config_file   [optional] Path to Dockerfile. Default looks for 'Dockerfile' in Context path.
+#   [*]                         All additional args are passed to the container entrypoint script.
 # Returns:
 #   None
 # Example:
